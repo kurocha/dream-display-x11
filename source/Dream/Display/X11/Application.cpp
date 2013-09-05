@@ -9,49 +9,50 @@
 #include "Application.h"
 #include "Context.h"
 
-namespace Dream {
-	namespace Client {
-		namespace Display {
-		
-			void IApplication::start (Ptr<IApplicationDelegate> delegate)
+namespace Dream 
+{
+	namespace Display 
+	{
+	
+		void IApplication::start (Ptr<IApplicationDelegate> delegate)
+		{
+			Ref<X11::Application> application = new X11::Application(delegate);
+			
+			application->run();
+		}
+	
+		namespace X11 {
+			Application::Application(Ptr<IApplicationDelegate> applicationDelegate) : _application_delegate(applicationDelegate)
 			{
-				Ref<X11::Application> application = new X11::Application(delegate);
-				
-				application->run();
+			
 			}
-		
-			namespace X11 {
-				Application::Application(Ptr<IApplicationDelegate> applicationDelegate) : _application_delegate(applicationDelegate)
-				{
-				
-				}
-				
-				Application::~Application ()
-				{
-				
-				}
+			
+			Application::~Application ()
+			{
+			
+			}
 
-				void Application::run()
-				{
-					_application_delegate->application_did_finish_launching(this);
-					_application_delegate->application_did_enter_foreground(this);
-					
-					while (true)
-					{
-						sleep(10);
-					}
-				}
+			void Application::run()
+			{
+				_application_delegate->application_did_finish_launching(this);
+				_application_delegate->application_did_enter_foreground(this);
 				
-				Ref<IContext> Application::create_context(Ref<Dictionary> config)
+				while (true)
 				{
-					return new WindowContext(config);
+					sleep(10);
 				}
-				
-				IApplicationDelegate * Application::delegate () const
-				{
-					return _application_delegate.get();
-				}
+			}
+			
+			Ref<IContext> Application::create_context(Ref<Dictionary> config)
+			{
+				return new WindowContext(config);
+			}
+			
+			IApplicationDelegate * Application::delegate () const
+			{
+				return _application_delegate.get();
 			}
 		}
 	}
 }
+
