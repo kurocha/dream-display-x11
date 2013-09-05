@@ -1,5 +1,5 @@
 
-compile_library 'DreamClientX11' do
+compile_library 'DreamDisplayX11' do
 	def source_files(environment)
 		FileList[root, 'Dream/**/*.cpp']
 	end
