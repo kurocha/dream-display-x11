@@ -13,15 +13,8 @@ namespace Dream
 {
 	namespace Display 
 	{
-	
-		void IApplication::start (Ptr<IApplicationDelegate> delegate)
+		namespace X11 
 		{
-			Ref<X11::Application> application = new X11::Application(delegate);
-			
-			application->run();
-		}
-	
-		namespace X11 {
 			Application::Application(Ptr<IApplicationDelegate> applicationDelegate) : _application_delegate(applicationDelegate)
 			{
 			

@@ -19,7 +19,10 @@ namespace Dream
 			using namespace Events::Logging;
 			using namespace Euclid::Numerics::Constants;
 
-// MARK: -
+			static FileDescriptorT x11_connection_file_descriptor(XDisplay * display)
+			{
+				return ConnectionNumber(display);
+			}			
 
 			static void check_glx_version(XDisplay * display)
 			{
@@ -193,6 +196,8 @@ namespace Dream
 					
 					if (!_display)
 						throw ContextInitializationError("Could not connect to X11 display!");
+					
+					_connection_file_descriptor = x11_connection_file_descriptor(_display);
 				}
 
 				setup_graphics_context(config, initial_size);
@@ -219,6 +224,21 @@ namespace Dream
 				}
 			}
 
+			void WindowContext::dequeue_events()
+			{
+				XEvent native_event;
+				int pending = XPending(_display);
+				
+				while (pending > 0)
+				{
+					XNextEvent(_display, &native_event);
+				
+					log_debug("dequeue_events: ", native_event.type);
+					
+					pending -= 1;
+				}
+			}
+
 			void WindowContext::render_frame()
 			{
 				if (!_initialized)
@@ -236,12 +256,16 @@ namespace Dream
 				glXMakeContextCurrent(_display, None, None, nullptr);
 			}
 
-			void WindowContext::start() {
+			void WindowContext::start()
+			{
 				logger()->log(LOG_DEBUG, "Starting context...");
 
 				if (!_renderer_thread) {
 					_renderer_thread = new Events::Thread;
 					_renderer_timer = new Events::TimerSource(std::bind(&WindowContext::render_frame, this), 1.0/60.0, true, true);
+					_input_handler = new Events::FileDescriptorSource(std::bind(&WindowContext::dequeue_events, this), _connection_file_descriptor);
+
+					_renderer_thread->loop()->monitor(_input_handler);
 					_renderer_thread->loop()->schedule_timer(_renderer_timer);
 				}
 
@@ -253,18 +277,20 @@ namespace Dream
 				_renderer_thread->start();
 			}
 
-			void WindowContext::stop() {
+			void WindowContext::stop()
+			{
 				logger()->log(LOG_DEBUG, "Stopping context...");
 
 				_renderer_thread->stop();
 			}
 
-			Vec2u WindowContext::size() {
+			Vec2u WindowContext::size()
+			{
 				return Vec2u(1024, 768);
 			}
 
-			void WindowContext::set_cursor_mode(CursorMode mode) {
-
+			void WindowContext::set_cursor_mode(CursorMode mode)
+			{
 			}
 		}
 	}

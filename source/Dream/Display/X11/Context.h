@@ -35,6 +35,7 @@ namespace Dream
 			protected:
 				XDisplay * _display;
 				XWindow _window;
+				FileDescriptorT _connection_file_descriptor;
 
 				GLXContext _glx_context;
 				GLXWindow _glx_window;
@@ -43,6 +44,8 @@ namespace Dream
 
 				Ref<Events::Thread> _renderer_thread;
 				Ref<Events::TimerSource> _renderer_timer;
+				Ref<Events::FileDescriptorSource> _input_handler;
+				
 				void render_frame();
 
 				void setup_graphics_context(Ptr<Dictionary> config, Vec2u size);
